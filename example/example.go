@@ -9,8 +9,8 @@ import (
 
 	_ "net/http/pprof"
 
+	_ "github.com/aitsvet/debugcharts"
 	"github.com/gorilla/handlers"
-	_ "github.com/mkevac/debugcharts"
 )
 
 func dummyCPUUsage() {

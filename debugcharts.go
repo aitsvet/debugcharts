@@ -1,20 +1,20 @@
 // Simple live charts for memory consumption and GC pauses.
 //
 // To use debugcharts, link this package into your program:
-//	import _ "github.com/mkevac/debugcharts"
+//
+//	import _ "github.com/aitsvet/debugcharts"
 //
 // If your application is not already running an http server, you
 // need to start one.  Add "net/http" and "log" to your imports and
 // the following code to your main function:
 //
-// 	go func() {
-// 		log.Println(http.ListenAndServe("localhost:6060", nil))
-// 	}()
+//	go func() {
+//		log.Println(http.ListenAndServe("localhost:6060", nil))
+//	}()
 //
 // Then go look at charts:
 //
 //	http://localhost:6060/debug/charts
-//
 package debugcharts
 
 import (
@@ -28,8 +28,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/aitsvet/debugcharts/bindata"
 	"github.com/gorilla/websocket"
-	"github.com/mkevac/debugcharts/bindata"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/process"
 )
