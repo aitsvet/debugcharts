@@ -19,6 +19,7 @@ package debugcharts
 
 import (
 	"encoding/json"
+	"expvar"
 	"fmt"
 	"log"
 	"net/http"
@@ -44,7 +45,8 @@ type update struct {
 	Goroutine      int
 	Heap           int
 	Mutex          int
-	Threadcreate   int
+	ThreadCreate   int
+	RPS            int64
 }
 
 type consumer struct {
@@ -77,11 +79,16 @@ type PprofPair struct {
 	Threadcreate int
 }
 
+type RPSPair struct {
+	RPS int64
+}
+
 type DataStorage struct {
 	BytesAllocated []SimplePair
 	GcPauses       []SimplePair
 	CPUUsage       []CPUPair
 	Pprof          []PprofPair
+	RPS            []RPSPair
 }
 
 const (
@@ -103,6 +110,8 @@ var (
 	myProcess    *process.Process
 )
 
+var RPS = expvar.NewInt("RPS")
+
 func (s *server) gatherData() {
 	timer := time.Tick(time.Second)
 
@@ -120,15 +129,17 @@ func (s *server) gatherData() {
 				Goroutine:    pprof.Lookup("goroutine").Count(),
 				Heap:         pprof.Lookup("heap").Count(),
 				Mutex:        pprof.Lookup("mutex").Count(),
-				Threadcreate: pprof.Lookup("threadcreate").Count(),
+				ThreadCreate: pprof.Lookup("threadcreate").Count(),
+				RPS:          RPS.Value(),
 			}
+			data.RPS = append(data.RPS, RPSPair{RPS: u.RPS})
 			data.Pprof = append(data.Pprof, PprofPair{
 				uint64(nowUnix) * 1000,
 				u.Block,
 				u.Goroutine,
 				u.Heap,
 				u.Mutex,
-				u.Threadcreate,
+				u.ThreadCreate,
 			})
 
 			cpuTimes, err := myProcess.Times()

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/aitsvet/debugcharts"
 	"log"
 	"net/http"
 	"runtime"
@@ -10,7 +11,6 @@ import (
 	_ "net/http/pprof"
 
 	_ "github.com/aitsvet/debugcharts"
-	"github.com/gorilla/handlers"
 )
 
 func dummyCPUUsage() {
@@ -40,8 +40,19 @@ func dummyAllocations() {
 func main() {
 	go dummyAllocations()
 	go dummyCPUUsage()
+
+	http.HandleFunc("/rps", func(_ http.ResponseWriter, _ *http.Request) {
+		debugcharts.RPS.Add(1)
+	})
 	go func() {
-		log.Fatal(http.ListenAndServe(":8080", handlers.CompressHandler(http.DefaultServeMux)))
+		t := time.NewTicker(time.Second)
+		for range t.C {
+			debugcharts.RPS.Set(0)
+		}
+	}()
+
+	go func() {
+		log.Fatal(http.ListenAndServe(":8080", nil))
 	}()
 	log.Printf("you can now open http://localhost:8080/debug/charts/ in your browser")
 	select {}
